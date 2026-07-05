@@ -1,3 +1,5 @@
+[![CI](https://github.com/shadowmodder/tool-loop/actions/workflows/ci.yml/badge.svg)](https://github.com/shadowmodder/tool-loop/actions/workflows/ci.yml)
+
 # tool-loop
 
 A minimal, correct implementation of the Anthropic agentic tool-use loop.
