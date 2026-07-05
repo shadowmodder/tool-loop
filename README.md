@@ -1,6 +1,6 @@
 # tool-loop
 
-A minimal, correct implementation of the Claude agentic tool-use loop.
+A minimal, correct implementation of the Anthropic agentic tool-use loop.
 
 Most implementations get at least one of these wrong. This one doesn't.
 
@@ -29,7 +29,7 @@ Tools are plain Python functions. Schemas are auto-generated from type annotatio
 
 ### 1. Serial tool dispatch
 
-When Claude returns two `tool_use` blocks in a single response, a naive loop calls them one at a time:
+When the model returns two `tool_use` blocks in a single response, a naive loop calls them one at a time:
 
 ```python
 # common — unnecessarily slow
@@ -45,7 +45,7 @@ with ThreadPoolExecutor(max_workers=len(tool_blocks)) as ex:
     futures = {ex.submit(call_tool, b): b.id for b in tool_blocks}
 ```
 
-If Claude calls a slow external API and a fast local function in the same turn, both finish in the time of the slowest one.
+If the model calls a slow external API and a fast local function in the same turn, both finish in the time of the slowest one.
 
 ### 2. Exceptions crashing the loop
 
@@ -55,7 +55,7 @@ A tool that raises should return an error *to the model* so it can recover — n
 # broken — one bad tool call kills the entire agent
 result = my_tool(**block.input)
 
-# correct — Claude sees the error and can retry or apologise
+# correct — model sees the error and can retry or recover
 try:
     out = my_tool(**block.input)
     return str(out), False
@@ -217,7 +217,7 @@ python examples/calculator.py
 python examples/filesystem_agent.py
 ```
 
-`calculator.py` prompts Claude to compute three independent expressions, triggering parallel tool dispatch. `filesystem_agent.py` demonstrates error recovery: if a file doesn't exist, the error is returned to Claude as a tool_result so it can adjust rather than crashing.
+`calculator.py` sends a multi-part math question, triggering parallel tool dispatch across three independent computations. `filesystem_agent.py` demonstrates error recovery: if a file doesn't exist, the error is returned as a `tool_result` with `is_error=True` so the model can adjust rather than crashing.
 
 ---
 
